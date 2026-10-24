@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Shortlink - TinyURL but Worse</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+
+        * {
+            font-family: "Manrope", sans-serif;
+        }
+
+        body {
+            margin: 0; padding: 0;
+        }
+
+        .section {
+            width: 100%;
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: baseline;
+            margin: 0; padding: 0;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(219, 219, 219);
+        }
+    </style>
+</head>
+<body>
+    <div class = "section">
+        <div style = "margin-left: 15%;">
+            <h1 style = "font-size: 60px; margin: 0; padding: 0;"> Create a <span style = "color: rgb(85, 176, 246)"> <i> Shortlink </i> </span> in Seconds </h1>
+            <h3 style = "margin: 0; padding: 0; margin-top: -5px"> Turn any long URL into a shorter one. </h3>
+            <input id = "link" style = "width: 400px; margin-top: 10px;" placeholder = "Your URL"> <br>
+            <input id = "nick" style = "width: 270px; margin: 0; margin-top: 10px;" placeholder = "Link Nickname">
+            <button id = "generate" style = "width: 100px; margin: 0;"> Generate </button>
+            <p id = "return">  </p>
+        </div>
+    </div>
+
+    <div class = "section" style = "background-color: rgb(200, 226, 255);">
+        <img src = "https://static.vecteezy.com/system/resources/previews/072/678/006/non_2x/firebase-logo-icon-free-png.png" style = "width: 10%; margin-left: 15%;">
+
+        <div style = "width: 60%">
+            <h1 style = "margin: 0; padding: 0;"> About </h1>
+            <p style = "margin: 0; padding: 0; margin-top: 5px;">
+                I am working on some projects for my portfolio right now, and I am thought of making something
+                similar to TinyURL because the idea seemed easy and use my skills of a reading and writing
+                data from a database. To make this work, I used Firebase realtime database. The free Google database
+                is really good for beginners, has a lot of storage and is free. Sad thing with the GitHub pages thing
+                because the link is just as long.
+            </p>
+        </div>
+    </div>
+
+    <div class = "section" style = "height: 150px; color: whitesmoke; background-color: rgb(26, 33, 42); justify-content: center;">
+        <h3> Created By - Vladyslav Yeromin </h3>
+    </div>
+
+    <div class = "screen" id = "error" style = "display: none;">
+        <div>
+            <h1> Short <span style = "color: rgb(189, 0, 0)">404 Error</span> </h1>
+            <h3> Seems to have been a short <span style = "color: rgb(189, 0, 0)">error</span>. We are sorry</h3>
+            <button style = "color: whitesmoke; background-color: rgb(123, 0, 0); border: none;"> Return </button>
+        </div>
+    </div>
+
+    <div class = "screen" id = "redirect">
+        <div>
+            <h1> <span style = "color: rgb(85, 176, 246)">Short</span> Redirect...  </h1>
+            <h3> You will be on your <span style = "color: rgb(85, 176, 246)">short</span> page soon.</h3>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, get, set, ref, child } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC5gkfre2ZsPtphj8kDLZ-FEyaBWRR4O7Q",
+            authDomain: "shortlink-394eb.firebaseapp.com",
+            databaseURL: "https://shortlink-394eb-default-rtdb.firebaseio.com",
+            projectId: "shortlink-394eb",
+            storageBucket: "shortlink-394eb.firebasestorage.app",
+            messagingSenderId: "627355261962",
+            appId: "1:627355261962:web:16d595c69e0cd831c953f3"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // check for getting link
+        let page = new URLSearchParams(window.location.search).get("page");
+        
+        if (page == null) {
+            document.getElementById("redirect").style.display = "none"
+            let generate = document.getElementById("generate")
+            generate.addEventListener("click", () => {
+                let link = document.getElementById("link").value
+                let nick = document.getElementById("nick").value + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10)
+    
+                // check if nick was used
+                get(child(ref(db), "Links/")).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        while (Object.hasOwn(snapshot.val()["Links"], nick)) {
+                            nick = document.getElementById("nick").value + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10) + Math.floor(Math.random() * 10)
+                        }
+                    }
+                })
+
+                // create link
+                set(ref(db, "Links/" + nick), {
+                    link: link
+                })
+
+                // send out link
+                document.getElementById("return").innerHTML = "New link: https://0vlayer0.github.io/portfolio/shortlink.html?page=" + nick
+            })
+        }
+
+        else {
+            get(child(ref(db), "Links/" + page)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    document.getElementById("redirect").style.display = "flex"
+
+                    setTimeout(() => {
+                        window.location.replace(snapshot.val().link)
+                    }, 250)
+                }
+
+                else {
+                    document.getElementById("redirect").style.display = "none"
+                    document.getElementById("error").style.display = "flex"
+                }
+            })
+        }
+    </script>
+</body>
+</html>
