@@ -107,9 +107,13 @@
                     }
                 })
 
+                // create link
                 set(ref(db, "Links/" + nick), {
                     link: link
                 })
+
+                // send out link
+                document.getElementById("return").innerHTML = "New link: https://0vlayer0.github.io/portfolio/shortlink.html?page=" + nick
             })
         }
 
